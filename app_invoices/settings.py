@@ -17,6 +17,18 @@ SECRET_KEY = 'django-insecure-^vext5%474&h!ntb2y^8ena1^+!vj-p!$6s)cb@s026bk6#38g
 DEBUG = True
 
 ALLOWED_HOSTS = []
+# Elle message à affiche les message de succes et d'erreur elle se trouve ds le fichier base.html ou views.py
+try:
+    from django.contrib.messages import constants as messages
+    MESSAGE_TAGS = {
+        messages.DEBUG: 'alert-info',
+        messages.INFO: 'alert-info',
+        messages.SUCCESS: 'alert-success',
+        messages.WARNING: 'alert-warning',
+        messages.ERROR: 'alert-danger'
+    }
+except Exception as e:
+    pass    
 
 
 # Application definition

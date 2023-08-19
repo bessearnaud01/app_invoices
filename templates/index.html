@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+<!-- On charge le dossier static-->
+{% load static %} {% block content %}
+<br><br>
+
+<div class="row">
+    <a href="" class="btn col-md-4 btn-primary">
+      Register a new invoice
+       <span class="badge text-bg-secondary"></span>
+   </a>
+
+    <a href='#' class="col-md-4">
+        <span class="badge text-bg-secondary"></span>
+    </a>
+
+    <a href="{% url 'add_customer'%}" class="btn col-md-4 btn-primary">
+         Register a new customer <span class="badge text-bg-secondary"></span>
+   </a>
+
+</div>
+
+<br> <br>
+
+<div class="form-group ">
+    <input id="search" class="form-control" type="text" placeholder="Search....">
+</div>
+
+<div>
+    <table class="table table-striped-columns">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">CUSTOMERS NAME</th>
+                <th scope="col">DATE</th>
+                <th scope="col">TOTAL</th>
+                <th scope="col">PAID</th>
+                <th scope="col">TYPE OF INVOICE</th>
+                <th scope="col">ACTION</th>
+            </tr>
+        </thead>
+        <tbody id="myTable">
+            {% if invoices %} {% for facture in invoices %}
+            <tr>
+                <th scope="row">{{ facture.pk }}</th>
+                <td>{{facture.customer.name}}</td>
+                <td>{{facture.invoice_date_time}}</td>
+                <td>{{ facture.get_total }}</td>
+                <td>
+                    {% if facture.paid %}
+                    <!-- Si la facture a été payer on a besion d'une icone-->
+                    <img src="{% static 'images/icon-yes.svg' %}" alt="True"> {% else %}
+                    <img src="{% static 'images/icon-no.svg' %}" alt="False"> {% endif %}
+                </td>
+
+                <td>
+                    <!-- on pouvait mettre   acture.get_invoice_type_display affiche PROFORMA INVOICE,RECEIPT INVOICE;ou facture.invoice_type affiche R,P,I -->
+                    {{facture.get_invoice_type_display }}</td>
+
+                <td>
+                    <a href="" title="Detail" class="badge text-white bg-success">View</a>
+
+                    <button id="btn-invoice-sup" type="button" data-toggle="modal" data-target="#supprimer" class="badge text-white bg-danger" title="Supprimer" data-id="" data-customer="">
+                     Delele
+                    </button>
+
+                    <button id="btn-invoice-mod" type="button" data-toggle="modal" title="Modifier" data-target="#modifier" data-id="" data-customer="" class="badge text-dark bg-warning"> Modify
+                    </button>
+                </td>
+            </tr>
+
+            {% endfor %} {% else %}
+
+            <p class="text-center text-white">No invoice found.</p>
+            {% endif %}
+
+
+        </tbody>
+
+    </table>
+</div>
+
+
+<br><br> {% endblock %}

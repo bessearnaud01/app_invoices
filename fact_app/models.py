@@ -40,7 +40,7 @@ class Customer(models.Model):
         return self.name     
     
 
-class Invoice(models.Model):
+class Invoice(models.Model): 
     """
     Name: Invoice model definition
     Description: 
