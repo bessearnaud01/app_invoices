@@ -1,0 +1,163 @@
+{% extends "base.html" %} {% block content %}
+<br><br><br><br>
+
+<h1 class="text-capitalize text-center mx-10 bg-dark text-white"> Register a new invoice </h1>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <label for="customer"> Customer </label>
+            <select name="customer" class="form-control" id="customer">
+                <option> Choose the customer ... </option>
+                {% for customer in customers %}
+                 <!-- customer.id Elle permet de recuperer le name du customer  forloop.counter permet de donner une id a chaque ligne d'article-->
+                <option value="{{customer.id}}">{{forloop.counter}}-{{customer.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <label for="invoice"> Invoice Type </label>
+            <select name="invoice_type" class="form-control" id="invoice">
+                <option> Choose the invoice type ... </option>
+                <option value="R">RECEIPT</option>
+                <option value="P">PROFORMA INVOICE</option>
+                <option value="I">INVOICE</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="wrapper">
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="article-1">#1 Item name </label>
+                <input required name="article" type="text" class="form-control" id="article-1">
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="qty-1"> Quantity </label>
+                <input required name="qty" type="number" min="1" step="0.1" class="form-control" id="qty-1">
+            </div>
+
+            <div class="form-group col-md-3">
+                <label for="unit-1"> Unit Price </label>
+                <input required name="unit" type="number" min="1" step="0.1" onchange="handleChangeSingleArticle(this.id)" class="form-control" id="unit-1">
+            </div>
+            <!-- somme total de chaque article-->
+            <div class="form-group col-md-3">
+                <!-- "readonly" Ca veut dire c'est uniquement pour lire et qu'on ne peut pas modifier -->
+                <label for="total-a-1"> Total </label>
+                <input required name="total-a" type="number" min="1" step="0.1" readonly class="form-control" id="total-a-1">
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Prix total à payer-->
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <label for="total"> Total </label>
+            <input value="0" type="number" step="0.1" name="total" readonly class="form-control" id="total">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-12">
+            <label for="comment"> Comments </label>
+            <textarea class="form-control" name="comment" id="comment" cols="30" rows="1"></textarea>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary"> Save </button>
+
+</form>
+
+<br><br>
+
+<div class="row">
+
+    <button id="btn-add" class="btn btn-outline-danger w-50 col-md-6"> Add a new item line </button>
+    <button id="btn-remove" class="btn btn-outline-warning w-50 col-md-6"> Remove last item line </button>
+
+</div>
+
+<br><br><br><br>
+
+
+
+<script type="text/javascript">
+    // click to add new line item 
+
+    $(document).on('click', '#btn-add', function() {
+
+        var number = $('#wrapper').children().length + 1; // Elle presente l'id de chaque ligne de commande d'un article
+
+        let formAdd = `
+    
+                        <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="article-${number}">#${number} Item name </label>
+                                    <input required name="article" type="text" class="form-control" id="article-${number}">
+                                </div>
+    
+                                <div class="form-group col-md-2">
+                                    <label for="qty-${number}"> Quantity </label>
+                                    <input required name="qty" type="number" min="1" step="0.1"  class="form-control" id="qty-${number}">
+                                </div>
+    
+                                <div class="form-group col-md-3">
+                                    <label for="unit-${number}"> Unit Price </label>
+                                    <input required name="unit" type="number" min="1" step="0.1" onchange="handleChangeSingleArticle(this.id)" class="form-control" id="unit-${number}">
+                                </div>
+    
+                                <div class="form-group col-md-3">
+                                    <label for="total-a-${number}"> Total </label>
+                                    <input required name="total-a" type="number" min="1" step="0.1" readonly class="form-control"
+                                        id="total-a-${number}">
+                                </div>
+    
+                            </div>
+                    `;
+
+        // Elle permt d'ajouter une dernière ligne d'article
+        $("#wrapper:last").append(formAdd);
+    })
+
+
+    // Remove last item line = cette fonction Elle permet d'enlever le dernièr article lorsqu'on veut le supprimer
+
+    $(document).on('click', '#btn-remove', function() {
+        $("#wrapper").children().last().remove();
+    })
+
+    //Cette fonction permet de recupere l'id et de faire de faire la somme de quantite et prix unitaire
+
+    function handleChangeSingleArticle(id) {
+        // On va la calucle 
+        console.log(id.toString().split('-')) //The split() method splits a string into a list.
+        let articleId = id.split('-')[1]; // Elle permet de supprimer - et 1 du premier formulaire
+
+        let idQty = `#qty-${articleId}`;
+
+        let unitId = `#unit-${articleId}`;
+
+        let totalIdLine = `#total-a-${articleId}`;
+
+        let totalLine = parseFloat($(idQty).val()) * parseFloat($(unitId).val());
+
+        $(totalIdLine).val(totalLine);
+
+        $('#total').val(parseFloat($('#total').val()) + totalLine);
+
+    }
+
+    //Code à refaire
+</script>
+{% endblock content %}

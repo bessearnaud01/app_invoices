@@ -4,7 +4,7 @@
 <br><br>
 
 <div class="row">
-    <a href="" class="btn col-md-4 btn-primary">
+    <a href="{% url 'add_invoice'%}" class="btn col-md-4 btn-primary">
       Register a new invoice
        <span class="badge text-bg-secondary"></span>
    </a>
@@ -40,6 +40,12 @@
         </thead>
         <tbody id="myTable">
             {% if invoices %} {% for facture in invoices %}
+
+            <!--$
+           facture.pk  It doesn't matter. pk is more independent from the actual primary key field i.e. 
+            you don't need to care whether the primary key field is called id or object_id or whatever.
+            It also provides more consistency if you have models with different primary key fields.
+            -->
             <tr>
                 <th scope="row">{{ facture.pk }}</th>
                 <td>{{facture.customer.name}}</td>
@@ -47,7 +53,7 @@
                 <td>{{ facture.get_total }}</td>
                 <td>
                     {% if facture.paid %}
-                    <!-- Si la facture a été payer on a besion d'une icone-->
+                    <!-- Si la facture a été payer on a besion d'une icone True s'il n a pas payé false-->
                     <img src="{% static 'images/icon-yes.svg' %}" alt="True"> {% else %}
                     <img src="{% static 'images/icon-no.svg' %}" alt="False"> {% endif %}
                 </td>
@@ -57,18 +63,39 @@
                     {{facture.get_invoice_type_display }}</td>
 
                 <td>
-                    <a href="" title="Detail" class="badge text-white bg-success">View</a>
+                    <a href="/" title="Detail" class="badge text-white bg-success">View</a>
 
-                    <button id="btn-invoice-sup" type="button" data-toggle="modal" data-target="#supprimer" class="badge text-white bg-danger" title="Supprimer" data-id="" data-customer="">
-                     Delele
-                    </button>
+                    <button id="btn-invoice-sup" type="button" data-toggle="modal" data-target="#supprimer" class="badge text-white bg-danger" title="Supprimer" data-id="{{facture.pk}}" data-customer="{{facture.customer.name}}">Delete
+               </button>
 
                     <button id="btn-invoice-mod" type="button" data-toggle="modal" title="Modifier" data-target="#modifier" data-id="" data-customer="" class="badge text-dark bg-warning"> Modify
-                    </button>
+               </button>
                 </td>
             </tr>
 
-            {% endfor %} {% else %}
+            {% endfor %} {% if invoices.has_other_pages %}
+
+            <div class="btn-group" role="group" aria-label="Item pagination">
+
+                {% if invoices.has_previous %}
+
+                <a href="?page={{ invoices.previous_page_number }}" class="btn btn-outline-primary">&laquo;</a> {% endif %} {% for page_number in invoices.paginator.page_range %} {% if invoices.number == page_number %}
+
+                <button class="btn btn-outline-primary active">
+                     <span> {{page_number}} <span class="sr-only">(current)</span></span>
+
+                  </button> {% else %}
+                <a href="?page={{page_number}}" class="btn btn-outline-primary">
+                        {{ page_number }}
+                     </a> {% endif %} {% endfor %} {% if invoices.has_next %}
+
+                <a href="?page={{ invoices.next_page_number }}" class="btn btn-outline-primary">&laquo;</a> {% endif %}
+
+
+
+            </div>
+
+            {% endif %} {% else %}
 
             <p class="text-center text-white">No invoice found.</p>
             {% endif %}
@@ -80,4 +107,133 @@
 </div>
 
 
-<br><br> {% endblock %}
+<!-- Modal modifier -->
+<div class="modal fade" id="modifier" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark text-center" id="exampleModalLabel">Modification</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+
+                    <input name="id_modified" type="hidden" id="id_modified">
+
+                    <label id="label_id" class="text-dark checkbox-inline"> <strong id="strong_id"> This bill has been paid?</strong></label>
+
+                    <input type="radio" id="html" name="modified" value="True">
+                    <label class="text-white bg-primary" for="html">Yes</label>
+
+                    <input type="radio" id="css" name="modified" value="False">
+                    <label class="text-white bg-danger" for="css">No</label><br>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- end modal-->
+
+<!-- Modal suppression -->
+<div class="modal fade" id="supprimer" tabindex="-1" role="dialog" aria-labelledby="sexampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark" id="sexampleModalLabel">Delete Invoice</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input name="id_supprimer" type="hidden" id="id_supprimer">
+                    <label id="label_id_s" class="text-dark checkbox-inline"> <strong id="strong_id_s">Are you sure you want to delete the invoice  ?</strong></label>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- end modal-->
+
+
+<br><br>
+
+
+<script type="text/javascript">
+    // modification
+
+    $(document).on('click', '#btn-invoice-mod', function() {
+        let invoice_id = $(this).data('id'); //$this represente l 'élement qu'on clique la dessus qui est #btn-invoice-mod
+        let customer = $(this).data('customer');
+        $('#id_modified').val(invoice_id);
+
+    })
+
+    // deleting of invoice
+
+    $(document).on('click', '#btn-invoice-sup', function() {
+        let invoice_id = $(this).data('id'); //$this represente l 'élement qu'on clique la dessus qui est
+        let customer = $(this).data('customer');
+        $('#id_supprimer').val(invoice_id);
+
+    })
+</script>
+
+
+<script type="text/javascript">
+    // On va utilise jquery
+    // modification
+
+    $(document).on('click', '#btn-invoice-mod', function() {
+        let invoice_id = $(this).data('id');
+        let customer = $(this).data('customer');
+        $('#id_modified').val(invoice_id);
+
+    })
+
+    // deleting of invoice
+
+    $(document).on('click', '#btn-invoice-sup', function() {
+        let invoice_id = $(this).data('id');
+        let customer = $(this).data('customer');
+        $('#id_supprimer').val(invoice_id);
+
+    })
+</script>
+
+
+<script>
+    $(document).ready(function() {
+        //Fonction qui permet permet de faire des recherche sur une table
+        // On pointe l'id search et on veut saisir un nom dans le champs dont met keyup
+        $("#search").on("keyup", function() {
+            var value = $(this).val().toLowerCase(); //On recupere la valeur du search et je la transforme en majiscule
+            // Je vais ds myTable je veux tr et je créer un filtre
+            $("#myTable tr").filter(function() {
+                // dans cette fonction recupere les tr
+                //toggle permet de faire les changemnts de la table et le .text() est un texte
+                //The toLocaleLowerCase() method of String values returns this string converted to lower case,
+                //ET according to any locale-specific case mappings
+                $(this).toggle($(this).text().toLocaleLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}
