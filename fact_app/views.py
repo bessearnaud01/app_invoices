@@ -30,9 +30,50 @@ class HomeView(View):
 
         return render(request, self.templates_name, self.context)
     
+
+
+    
     # Cette fonction sert à envoyer des données
     
     def post(self, request, *args, **kwags):
+
+
+          # modify an invoice
+          # On teste si valeur existe request.POST.get('id_modified')
+
+        if request.POST.get('id_modified'):
+
+            paid = request.POST.get('modified') # paid prend la valeur du name= modified
+
+            try: 
+
+                 # obj recupere l'id_modified
+                obj = Invoice.objects.get(id=request.POST.get('id_modified'))
+                # si l'utilisateur choisit paid = true alors obj.paid= True
+
+                if paid == 'True':
+
+                    obj.paid = True
+
+                else:
+                     # si l'utilisateur choisit paid = false alors obj.paid= false
+
+                    obj.paid = False 
+
+                obj.save() 
+
+                messages.success(request,("Change made successfully.")) 
+
+            except Exception as e:   
+
+                messages.error(request, f"Sorry, the following error has occured {e}.")   
+
+
+
+
+
+
+
 
 
         # Elle nous permet de rafraichir notre index

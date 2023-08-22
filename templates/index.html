@@ -68,7 +68,7 @@
                     <button id="btn-invoice-sup" type="button" data-toggle="modal" data-target="#supprimer" class="badge text-white bg-danger" title="Supprimer" data-id="{{facture.pk}}" data-customer="{{facture.customer.name}}">Delete
                </button>
 
-                    <button id="btn-invoice-mod" type="button" data-toggle="modal" title="Modifier" data-target="#modifier" data-id="" data-customer="" class="badge text-dark bg-warning"> Modify
+                    <button id="btn-invoice-mod" type="button" data-toggle="modal" title="Modifier" data-target="#modifier" data-id="{{facture.pk}}" data-customer="{{facture.customer.name}}" class="badge text-dark bg-warning"> Modify
                </button>
                 </td>
             </tr>
@@ -178,9 +178,9 @@
     // modification
 
     $(document).on('click', '#btn-invoice-mod', function() {
-        let invoice_id = $(this).data('id'); //$this represente l 'élement qu'on clique la dessus qui est #btn-invoice-mod
-        let customer = $(this).data('customer');
-        $('#id_modified').val(invoice_id);
+        let invoice_id = $(this).data('id'); //$this represente l 'élement qu'on clique la dessus qui est #btn-invoice-mod et on recupere l'id qui est data-id
+        let customer = $(this).data('customer'); //n recupere l'id qui est data-customer
+        $('#id_modified').val(invoice_id); //on va pointer sur le formulaire pour recuperer l'id qui est invoice_id
 
     })
 
@@ -195,26 +195,6 @@
 </script>
 
 
-<script type="text/javascript">
-    // On va utilise jquery
-    // modification
-
-    $(document).on('click', '#btn-invoice-mod', function() {
-        let invoice_id = $(this).data('id');
-        let customer = $(this).data('customer');
-        $('#id_modified').val(invoice_id);
-
-    })
-
-    // deleting of invoice
-
-    $(document).on('click', '#btn-invoice-sup', function() {
-        let invoice_id = $(this).data('id');
-        let customer = $(this).data('customer');
-        $('#id_supprimer').val(invoice_id);
-
-    })
-</script>
 
 
 <script>
