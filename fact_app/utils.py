@@ -11,7 +11,7 @@ def pagination(request, invoices):
 
         # paginate items
 
-        items_per_page = 3
+        items_per_page = 5
 
         paginator = Paginator(invoices, items_per_page)
 
@@ -29,3 +29,19 @@ def pagination(request, invoices):
 
         return items_page    
 
+
+
+
+def get_invoice(pk):
+    """ get invoice fonction """
+
+    obj = Invoice.objects.get(pk=pk)
+
+    articles = obj.article_set.all()
+
+    context = {
+        'obj': obj,
+        'articles': articles
+    }
+
+    return context

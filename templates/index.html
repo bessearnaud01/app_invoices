@@ -63,7 +63,7 @@
                     {{facture.get_invoice_type_display }}</td>
 
                 <td>
-                    <a href="/" title="Detail" class="badge text-white bg-success">View</a>
+                    <a href="{% url 'view_invoice' pk=facture.pk %}" title="Detail" class="badge text-white bg-success">View</a>
 
                     <button id="btn-invoice-sup" type="button" data-toggle="modal" data-target="#supprimer" class="badge text-white bg-danger" title="Supprimer" data-id="{{facture.pk}}" data-customer="{{facture.customer.name}}">Delete
                </button>
@@ -185,6 +185,7 @@
     })
 
     // deleting of invoice
+    //On veut supprimer
 
     $(document).on('click', '#btn-invoice-sup', function() {
         let invoice_id = $(this).data('id'); //$this represente l 'élement qu'on clique la dessus qui est

@@ -3,7 +3,21 @@ from django.views import View
 from .models import *
 from django.contrib import messages # On créer les messages dans le fichier base.html
 from django.db import transaction
-from .utils import pagination
+
+import pdfkit
+
+import datetime
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+
+from django.template.loader import get_template
+
+from django.http import HttpResponse
+
+from .utils import pagination,get_invoice
+
 
 
 
@@ -15,7 +29,8 @@ class HomeView(View):
     templates_name ='index.html'
     # objects.select_related('customer', 'save_by') permet de recupere les valeur d'autre entite
     # C'est parce que nous avons une relation ManyToMany
-    invoices =  Invoice.objects.select_related('customer', 'save_by').all()
+    #-invoice_date_time represente la date d'ajout de la facture verifie ds le modele on veut lire les facture en fonction de la ddate
+    invoices =  Invoice.objects.select_related('customer', 'save_by').all().order_by('-invoice_date_time')
 
    
     context = {
@@ -31,8 +46,6 @@ class HomeView(View):
         return render(request, self.templates_name, self.context)
     
 
-
-    
     # Cette fonction sert à envoyer des données
     
     def post(self, request, *args, **kwags):
@@ -59,7 +72,7 @@ class HomeView(View):
                      # si l'utilisateur choisit paid = false alors obj.paid= false
 
                     obj.paid = False 
-
+                # On sauvegarde l'objet
                 obj.save() 
 
                 messages.success(request,("Change made successfully.")) 
@@ -67,16 +80,27 @@ class HomeView(View):
             except Exception as e:   
 
                 messages.error(request, f"Sorry, the following error has occured {e}.")   
+            
+
+             # deleting an invoice   ou on veut supprimer la facture
+             # on va teste si l'id 
+
+        if request.POST.get('id_supprimer'):
+
+            try:
+
+                obj = Invoice.objects.get(pk=request.POST.get('id_supprimer'))
+
+                obj.delete()
+
+                messages.success(request,("The deletion was successful."))   
+
+            except Exception as e:
+
+                messages.error(request, f"Sorry, the following error has occured {e}.")     
 
 
-
-
-
-
-
-
-
-        # Elle nous permet de rafraichir notre index
+        # Elle nous permet de rafraichir notre table donc le met après les fonction get, post
         items = pagination(request, self.invoices)
 
         self.context['invoices'] = items
@@ -207,3 +231,68 @@ class AddInvoiceView(View):
         except Exception as e:
                messages.error(request, f"Sorry the following error has occured {e}.")   
         return render(request, self.templates_name,self.context)
+
+
+# cette classe Elle permet de visualiser la facture du client
+class InvoiceVisualizationView(View):
+    """ This view helps to visualize the invoice """
+
+    templates_name = 'invoice.html'
+
+    # Elle sert à passer plusieurs argument dams une fonction
+    # Elle permet de mettre *args permet de mettre d'argument à l'infinit par contre **kwargs permet de mettre un dictionnaire d'argument à l'infinit
+
+    def get(self, request, *args, **kwargs):
+        # on recupere l'id d'invoice donc pk est une clé primaire obj recupere l'objet invoice par la clé primaire pk
+
+
+        # ON VEUT AVOIR TOUT LES ARTICLES RELIER A L'OBJET INVOICE exemple on veut recupere qui est le client qui à payer tout les article
+        pk = kwargs.get('pk')
+        # get_invoice est une fonction du utils.py
+        # c'est ce get_invoice qui permet  de recuperer les valeurs de cette fonction
+        context = get_invoice(pk)
+
+        return render(request, self.templates_name, context)
+
+        
+
+
+    # cette fonction permet de generer une facture pdf
+    #@superuser_required
+    def get_invoice_pdf(request, *args, **kwargs):
+        """ generate pdf file from html file """
+        # On va chercher à recuperer l'id de la facture
+        pk = kwargs.get('pk')
+        # get_invoice est une fonction du utils.py
+        # c'est ce get_invoice qui permet  de recuperer les valeurs de cette fonction
+        context = get_invoice(pk) 
+
+        context['date'] = datetime.datetime.today()
+
+        # get html file
+        template = get_template('invoice-pdf.html')
+
+        # render html with context variables
+
+        html = template.render(context)
+
+        # options of pdf format 
+
+        options = {
+            'page-size': 'Letter',
+            'encoding': 'UTF-8',
+            "enable-local-file-access": ""
+        }
+
+        # generate pdf 
+
+        pdf = pdfkit.from_string(html, False, options)
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+
+        response['Content-Disposition'] = "attachement"
+
+        return response
+
+
+
