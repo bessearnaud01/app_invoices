@@ -233,14 +233,14 @@ class AddInvoiceView(View):
         return render(request, self.templates_name,self.context)
 
 
-# cette classe Elle permet de visualiser la facture du client
+# cette classe Elle permet de visualiser la facture du client ou de recupere la facture
 class InvoiceVisualizationView(View):
     """ This view helps to visualize the invoice """
 
     templates_name = 'invoice.html'
 
-    # Elle sert à passer plusieurs argument dams une fonction
-    # Elle permet de mettre *args permet de mettre d'argument à l'infinit par contre **kwargs permet de mettre un dictionnaire d'argument à l'infinit
+        # Elle sert à passer plusieurs argument dams une fonction
+        # Elle permet de mettre *args permet de mettre d'argument à l'infinit par contre **kwargs permet de mettre un dictionnaire d'argument à l'infinit
 
     def get(self, request, *args, **kwargs):
         # on recupere l'id d'invoice donc pk est une clé primaire obj recupere l'objet invoice par la clé primaire pk
@@ -254,45 +254,44 @@ class InvoiceVisualizationView(View):
 
         return render(request, self.templates_name, context)
 
-        
+# Fonction qui permet de generer les pdf ne fait pas partir de la classe  InvoiceVisualizationView 
+# cette fonction permet de generer une facture pdf
+#@superuser_required
+def get_invoice_pdf(request, *args, **kwargs):
+    """ generate pdf file from html file """
+    # On va chercher à recuperer l'id de la facture
+    pk = kwargs.get('pk')
+    # get_invoice est une fonction du utils.py
+    # c'est ce get_invoice qui permet  de recuperer la facture de cette fonction
+    context = get_invoice(pk) 
 
+    # atetime.datetime.today() elle de donner la date à la quelle la facture a été generer
+    context['date'] = datetime.datetime.today() # date elle est utile ds le fichier invoice_pdf.html
 
-    # cette fonction permet de generer une facture pdf
-    #@superuser_required
-    def get_invoice_pdf(request, *args, **kwargs):
-        """ generate pdf file from html file """
-        # On va chercher à recuperer l'id de la facture
-        pk = kwargs.get('pk')
-        # get_invoice est une fonction du utils.py
-        # c'est ce get_invoice qui permet  de recuperer les valeurs de cette fonction
-        context = get_invoice(pk) 
+    # get html file
+    template = get_template('invoice_pdf.html')
 
-        context['date'] = datetime.datetime.today()
+    # render html with context variables
 
-        # get html file
-        template = get_template('invoice-pdf.html')
+    html = template.render(context)
 
-        # render html with context variables
+    # options of pdf format  va sur le site pour plus d'options https://pypi.org/project/pdfkit/
 
-        html = template.render(context)
+    options = {
+        'page-size': 'Letter',
+        'encoding': 'UTF-8',
+        "enable-local-file-access": ""
+    }
 
-        # options of pdf format 
+    # generate pdf  le false permet d'avoir une fausse couverture
 
-        options = {
-            'page-size': 'Letter',
-            'encoding': 'UTF-8',
-            "enable-local-file-access": ""
-        }
+    pdf = pdfkit.from_string(html, False, options)
+    # Elle permet de télécharge notre pdf
+    response = HttpResponse(pdf, content_type='application/pdf')
+    # Elle permet de lorsqu'on clique le fichier se telecharge 
+    response['Content-Disposition'] = "attachement"
 
-        # generate pdf 
-
-        pdf = pdfkit.from_string(html, False, options)
-
-        response = HttpResponse(pdf, content_type='application/pdf')
-
-        response['Content-Disposition'] = "attachement"
-
-        return response
+    return response
 
 
 

@@ -30,8 +30,13 @@ def pagination(request, invoices):
         return items_page    
 
 
+  # Elle permet de mettre *args permet de mettre d'argument à l'infinit par contre **kwargs permet de mettre un dictionnaire d'argument à l'infinit
 
 
+# on recupere l'id d'invoice donc pk est une clé primaire obj recupere l'objet invoice par la clé primaire pk
+
+
+        # ON VEUT AVOIR TOUT LES ARTICLES RELIER A L'OBJET INVOICE exemple on veut recupere qui est le client qui à payer tout les article
 def get_invoice(pk):
     """ get invoice fonction """
 
