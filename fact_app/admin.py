@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext as _
 # Register your models here.
 from .models import * 
 
@@ -14,3 +15,8 @@ class AdminInvoice(admin.ModelAdmin):
 admin.site.register(Customer, AdminCustomer)
 admin.site.register(Invoice, AdminInvoice)
 admin.site.register(Article) 
+
+
+admin.site.site_title = _("BNAB INVOICE SYSTEM")
+admin.site.site_header = _("BNAB INVOICE SYSTEM")
+admin.site.index_title = _("BNAB INVOICE SYSTEM")

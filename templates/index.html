@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% load i18n %}
 <!-- On charge le dossier static-->
 {% load static %} {% block content %}
 <br><br>
 
 <div class="row">
     <a href="{% url 'add_invoice'%}" class="btn col-md-4 btn-primary">
-      Register a new invoice
+       {% trans 'Register a new invoice' %}
        <span class="badge text-bg-secondary"></span>
    </a>
 
@@ -14,7 +14,7 @@
     </a>
 
     <a href="{% url 'add_customer'%}" class="btn col-md-4 btn-primary">
-         Register a new customer <span class="badge text-bg-secondary"></span>
+        {% trans 'Register a new customer' %}<span class="badge text-bg-secondary"></span>
    </a>
 
 </div>
@@ -63,12 +63,14 @@
                     {{facture.get_invoice_type_display }}</td>
 
                 <td>
-                    <a href="{% url 'view_invoice' pk=facture.pk %}" title="Detail" class="badge text-white bg-success">View</a>
+                    <a href="{% url 'view_invoice' pk=facture.pk %}" title="Detail" class="badge text-white bg-success">  {% trans 'View' %}</a>
 
-                    <button id="btn-invoice-sup" type="button" data-toggle="modal" data-target="#supprimer" class="badge text-white bg-danger" title="Supprimer" data-id="{{facture.pk}}" data-customer="{{facture.customer.name}}">Delete
+                    <button id="btn-invoice-sup" type="button" data-toggle="modal" data-target="#supprimer" class="badge text-white bg-danger" title="{% trans 'Delete' %}" data-id="{{facture.pk}}" data-customer="{{facture.customer.name}}">
+                        {% trans 'Delete' %}</a>
                </button>
 
-                    <button id="btn-invoice-mod" type="button" data-toggle="modal" title="Modifier" data-target="#modifier" data-id="{{facture.pk}}" data-customer="{{facture.customer.name}}" class="badge text-dark bg-warning"> Modify
+                    <button id="btn-invoice-mod" type="button" data-toggle="modal" title="{% trans 'Modify' %}" data-target="#modifier" data-id="{{facture.pk}}" data-customer="{{facture.customer.name}}" class="badge text-dark bg-warning"> 
+                        {% trans 'modify' %}</a>
                </button>
                 </td>
             </tr>

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _ # Ce caractere _ va nous permettre de traduit le texte
 
 # On va mettre ses modele dans le fichier admin.py 
 
@@ -8,8 +9,8 @@ class Customer(models.Model):
     Name: Customer model definition
     """
     SEX_TYPES = (
-        ('M', ('Male')),
-        ('F',('Feminine')),
+        ('M', _('Male')),
+        ('F', _('Feminine')),
     )
     name = models.CharField(max_length=132)
 
@@ -47,9 +48,9 @@ class Invoice(models.Model):
     author:besseberenger@gmail.com
     """
     INVOICE_TYPE = (
-        ('R', ('RECEIPT')),
-        ('P', ('PROFORMA INVOICE')),
-        ('I',('INVOICE'))
+        ('R', _('RECEIPT')),
+        ('P', _('PROFORMA INVOICE')),
+        ('I', _('INVOICE'))
     )
 
     # ForeignKey(Customer, on_delete=models.PROTECT) est utile comme le clé

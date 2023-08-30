@@ -3,14 +3,11 @@ from django.views import View
 from .models import *
 from django.contrib import messages # On créer les messages dans le fichier base.html
 from django.db import transaction
-
+from .decorators import *
 import pdfkit
+from django.utils.translation import gettext as _
 
 import datetime
-
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-
 
 from django.template.loader import get_template
 
@@ -23,7 +20,7 @@ from .utils import pagination,get_invoice
 
 # Create your views here.
 
-class HomeView(View):
+class HomeView(LoginRequiredSuperuserMixim,View):
     """ Main view On va afficher les invoice dans le fichier index.html  """ 
 
     templates_name ='index.html'
@@ -75,7 +72,7 @@ class HomeView(View):
                 # On sauvegarde l'objet
                 obj.save() 
 
-                messages.success(request,("Change made successfully.")) 
+                messages.success(request,_("Change made successfully.")) 
 
             except Exception as e:   
 
@@ -93,7 +90,7 @@ class HomeView(View):
 
                 obj.delete()
 
-                messages.success(request,("The deletion was successful."))   
+                messages.success(request,_("The deletion was successful."))   
 
             except Exception as e:
 
@@ -114,7 +111,7 @@ class HomeView(View):
 # On veut ajouter une nouveau client donc on crée une nouvelle classe
 # cette classe elle est utile au fichier add_customer.html
 
-class AddCustomerView(View):
+class AddCustomerView(LoginRequiredSuperuserMixim,View):
 
     """ Main view """
     templates_name ='add_customer.html'
@@ -143,9 +140,9 @@ class AddCustomerView(View):
             created = Customer.objects.create(**data)
             if created:
                 # import message et l'affiche ensuite
-                messages.success(request, "Customer registered successfully.")
+                messages.success(request, _("Customer registered successfully."))
             else:
-                messages.error(request, "Sorry, please try again the sent data is corrupt.")
+                messages.error(request, _("Sorry, please try again the sent data is corrupt."))
 
         except Exception as e:
                
@@ -156,7 +153,7 @@ class AddCustomerView(View):
 
 # cette Classe permet d'ajouter une nouvelle  facture
 
-class AddInvoiceView(View):
+class AddInvoiceView(LoginRequiredSuperuserMixim,View):
 
     """ new invoice view """
     templates_name ='add_invoice.html'
@@ -224,9 +221,9 @@ class AddInvoiceView(View):
             created = Article.objects.bulk_create(items)   
             if created:
                 # Si l'article
-                messages.success(request, "Data saved successfully.") 
+                messages.success(request, _("Data saved successfully.")) 
             else:
-                messages.error(request, "Sorry, please try again the sent data is corrupt.")    
+                messages.error(request, _("Sorry, please try again the sent data is corrupt."))    
 
         except Exception as e:
                messages.error(request, f"Sorry the following error has occured {e}.")   
@@ -234,7 +231,7 @@ class AddInvoiceView(View):
 
 
 # cette classe Elle permet de visualiser la facture du client ou de recupere la facture
-class InvoiceVisualizationView(View):
+class InvoiceVisualizationView(LoginRequiredSuperuserMixim,View):
     """ This view helps to visualize the invoice """
 
     templates_name = 'invoice.html'
@@ -256,7 +253,7 @@ class InvoiceVisualizationView(View):
 
 # Fonction qui permet de generer les pdf ne fait pas partir de la classe  InvoiceVisualizationView 
 # cette fonction permet de generer une facture pdf
-#@superuser_required
+@superuser_required
 def get_invoice_pdf(request, *args, **kwargs):
     """ generate pdf file from html file """
     # On va chercher à recuperer l'id de la facture
